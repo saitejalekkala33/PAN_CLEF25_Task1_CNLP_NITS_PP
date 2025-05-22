@@ -176,11 +176,10 @@ parser.add_argument('--output-dir', type=str, required=True, help='Directory to 
 args = parser.parse_args()
 
 class CustomDataset(Dataset):
-    def __init__(self, df, tokenizer, text_column, label_column, max_length=512):
+    def __init__(self, df, tokenizer, text_column, max_length=512):
         self.texts = df[text_column].tolist()
         self.tokenizer = tokenizer
         self.max_length = max_length
-        self.labels = torch.tensor(df[label_column].values, dtype=torch.long)
 
     def __len__(self):
         return len(self.texts)
@@ -197,7 +196,6 @@ class CustomDataset(Dataset):
         return {
             'input_ids': encoding['input_ids'].squeeze(0).long(),
             'attention_mask': encoding['attention_mask'].squeeze(0).long(),
-            'label': self.labels[idx]
         }
 
 class HardMoEClassifier(nn.Module):
@@ -233,15 +231,14 @@ model.eval()
 
 # Debug: Print input file path and verify file existence
 input_file = args.input_file
-print(f"Attempting to read test CSV from: {input_file}")
+print(f"Attempting to read test jsonl from: {input_file}")
 if not os.path.exists(input_file):
     print(f"Error: File {input_file} does not exist")
     exit(1)
 
-test_data = pd.read_csv(input_file)
+test_data = df = pd.read_json(input_file, lines=True)
 text_column = "text"
-label_column = "label"
-test_dataset = CustomDataset(test_data, tokenizer, text_column, label_column)
+test_dataset = CustomDataset(test_data, tokenizer, text_column)
 test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
 
 predictions = []
@@ -252,13 +249,11 @@ with torch.no_grad():
     for batch in test_loader:
         input_ids = batch['input_ids'].to(device)
         attention_mask = batch['attention_mask'].to(device)
-        labels = batch['label'].to(device)
         outputs = model(input_ids, attention_mask)
         probs = torch.softmax(outputs, dim=1)
         predicted_labels = outputs.argmax(dim=1).cpu().numpy()
         predictions.extend(predicted_labels)
         probabilities.extend(probs.cpu().numpy())
-        true_labels.extend(labels.cpu().numpy())
 
 predictions = np.array(predictions)
 true_labels = np.array(true_labels)

@@ -23,3 +23,15 @@ python3 predict.py --model-path ALBERT_HardMoE_Task1.pth --input-file test.csv -
 --input-file: Path to the input CSV file containing test data.
 
 --output-dir: Directory where the output predictions will be saved.
+
+
+## Submission to TIRA
+1. Check if the code works:
+  ```bash
+  tira-cli code-submission --dry-run --path ./my-submission --task generative-ai-authorship-verification-panclef-2025 --dataset pan25-generative-ai-detection-smoke-test-20250428-training --mount-hf-model albert-base-v2
+  ```
+
+  If that ran successfully, you can omit the `-dry-run` argument to submit:
+  ```bash
+  tira-cli code-submission --path ./my-submission --task generative-ai-authorship-verification-panclef-2025 --dataset pan25-generative-ai-detection-smoke-test-20250428-training --mount-hf-model albert-base-v2
+  ```
