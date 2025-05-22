@@ -37,10 +37,11 @@ class HardMoEClassifier(nn.Module): \
                 expert_output = expert(cls_token[mask]); \
                 output[mask] = expert_output; \
         return output; \
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu") \
 AutoTokenizer.from_pretrained('microsoft/deberta-v3-large'); \
 model_path = hf_hub_download(repo_id='saiteja33/PAN25_1_DeBERTaV3Large_HardMoE', filename='DeBERTav3L_HardMoE_Task1.pth', repo_type='model'); \
 model = HardMoEClassifier(num_labels=2); \
-model.load_state_dict(torch.load(model_path, map_location='cpu')); \
+model.load_state_dict(torch.load(model_path, map_location=device)); \
 torch.save(model.state_dict(), '/app/DeBERTav3L_HardMoE_Task1.pth')"
 
 # Set environment for offline mode and copy remaining files
