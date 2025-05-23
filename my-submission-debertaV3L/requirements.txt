@@ -5,3 +5,4 @@ hf_xet
 huggingface_hub
 tiktoken
 protobuf
+sentencepiece
