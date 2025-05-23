@@ -146,7 +146,7 @@ class CustomDataset(Dataset):
 class HardMoEClassifier(nn.Module):
     def __init__(self, num_labels=2, dropout_prob=0.1):
         super(HardMoEClassifier, self).__init__()
-        self.base_model = AutoModel.from_pretrained('microsoft/deberta-v3-large', cache_dir='/app/model_cache')
+        self.base_model = AutoModel.from_pretrained('microsoft/deberta-v3-large', cache_dir=os.environ.get('HF_HOME', '/mnt/hf-model'))
         self.dropout = nn.Dropout(p=dropout_prob)
         self.experts = nn.ModuleList([
             nn.Linear(1024, num_labels) for _ in range(6)
@@ -169,7 +169,7 @@ class HardMoEClassifier(nn.Module):
         return output
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-tokenizer = AutoTokenizer.from_pretrained('microsoft/deberta-v3-large', cache_dir='/app/model_cache', use_fast=False)
+tokenizer = AutoTokenizer.from_pretrained('microsoft/deberta-v3-large', cache_dir=os.environ.get('HF_HOME', '/mnt/hf-model'), use_fast=False)
 model = HardMoEClassifier(num_labels=2).to(device)
 model.load_state_dict(torch.load(args.model_path, map_location=device))
 model.eval()
