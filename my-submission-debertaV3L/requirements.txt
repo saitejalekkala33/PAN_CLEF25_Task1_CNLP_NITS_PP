@@ -3,3 +3,5 @@ transformers
 pandas
 hf_xet
 huggingface_hub
+tiktoken
+protobuf
