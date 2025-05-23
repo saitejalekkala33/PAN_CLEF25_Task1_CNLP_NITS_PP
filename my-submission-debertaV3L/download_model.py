@@ -6,7 +6,7 @@ from torch import nn
 class HardMoEClassifier(nn.Module):
     def __init__(self, num_labels=2, dropout_prob=0.1):
         super().__init__()
-        self.base_model = AutoModel.from_pretrained('microsoft/deberta-v3-large', cache_dir='/app/model_cache')
+        self.base_model = AutoModel.from_pretrained('microsoft/deberta-v3-large')
         self.dropout = nn.Dropout(p=dropout_prob)
         self.experts = nn.ModuleList([nn.Linear(1024, num_labels) for _ in range(6)])
         self.gate = nn.Linear(1024, len(self.experts))
@@ -26,7 +26,7 @@ class HardMoEClassifier(nn.Module):
                 output[mask] = expert_output
         return output
 
-AutoTokenizer.from_pretrained('microsoft/deberta-v3-large', cache_dir='/app/model_cache', use_fast=False)
+AutoTokenizer.from_pretrained('microsoft/deberta-v3-large', use_fast=False)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
