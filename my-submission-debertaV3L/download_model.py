@@ -41,7 +41,6 @@
 # torch.save(model.state_dict(), '/app/DeBERTav3L_HardMoE_Task1.pth')
 
 
-
 import torch
 from huggingface_hub import hf_hub_download
 from transformers import AutoModel, AutoTokenizer
@@ -51,7 +50,8 @@ import os
 class HardMoEClassifier(nn.Module):
     def __init__(self, num_labels=2, dropout_prob=0.1):
         super().__init__()
-        self.base_model = AutoModel.from_pretrained('microsoft/deberta-v3-large', cache_dir='/app/model_cache')
+        cache_dir = os.environ.get('HF_HOME', '/mnt/hf-model')
+        self.base_model = AutoModel.from_pretrained('microsoft/deberta-v3-large', cache_dir=cache_dir)
         self.dropout = nn.Dropout(p=dropout_prob)
         self.experts = nn.ModuleList([nn.Linear(1024, num_labels) for _ in range(6)])
         self.gate = nn.Linear(1024, len(self.experts))
@@ -71,18 +71,12 @@ class HardMoEClassifier(nn.Module):
                 output[mask] = expert_output
         return output
 
+cache_dir = os.environ.get('HF_HOME', '/mnt/hf-model')
 try:
-    tokenizer = AutoTokenizer.from_pretrained('microsoft/deberta-v3-large', cache_dir='/app/model_cache', use_fast=False)
-    print("Tokenizer cached successfully")
+    tokenizer = AutoTokenizer.from_pretrained('microsoft/deberta-v3-large', cache_dir=cache_dir, use_fast=False)
+    print("Tokenizer loaded successfully")
 except Exception as e:
-    print(f"Error caching tokenizer: {e}")
-    exit(1)
-
-try:
-    model = AutoModel.from_pretrained('microsoft/deberta-v3-large', cache_dir='/app/model_cache')
-    print("Base model cached successfully")
-except Exception as e:
-    print(f"Error caching base model: {e}")
+    print(f"Error loading tokenizer: {e}")
     exit(1)
 
 try:
