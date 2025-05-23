@@ -67,7 +67,7 @@ class HardMoEClassifier(nn.Module):
         return output
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-tokenizer = AutoTokenizer.from_pretrained('microsoft/deberta-v3-large')
+tokenizer = AutoTokenizer.from_pretrained('microsoft/deberta-v3-large', use_fast=False)
 model = HardMoEClassifier(num_labels=2).to(device)
 model.load_state_dict(torch.load(args.model_path, map_location=device))
 model.eval()
