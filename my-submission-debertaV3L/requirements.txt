@@ -1,0 +1,5 @@
+torch
+transformers
+pandas
+hf_xet
+huggingface_hub
